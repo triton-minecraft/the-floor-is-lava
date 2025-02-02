@@ -2,3 +2,5 @@ name: TheFloorIsLava
 version: '1.0-SNAPSHOT'
 main: dev.kyriji.TheFloorIsLava
 api-version: '1.21'
+commands:
+  lifelink:
