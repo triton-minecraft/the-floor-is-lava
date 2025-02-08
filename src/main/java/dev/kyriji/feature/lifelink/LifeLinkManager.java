@@ -34,6 +34,7 @@ public class LifeLinkManager {
 	}
 
 	public static void removeLifeLink(LifeLink lifeLink) {
+		TeamManager.INSTANCE.removeTeam(lifeLink);
 		setGlowing(lifeLink, false);
 		lifeLinks.remove(lifeLink);
 	}

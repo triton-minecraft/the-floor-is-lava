@@ -108,14 +108,12 @@ public class GameListener implements Listener {
 
 		LifeLink lifeLink = LifeLinkManager.getLifeLink(event.getPlayer());
 
-		if(lifeLink != null) {
-			Player otherPlayer = lifeLink.getPlayerOne().equals(event.getPlayer()) ? lifeLink.getPlayerTwo() : lifeLink.getPlayerOne();
-			otherPlayer.damage(1000);
+		GameState gameState = GameManager.INSTANCE.getGame().getGameState();
 
+		if(lifeLink != null && gameState == GameState.WAITING) {
 			LifeLinkManager.removeLifeLink(lifeLink);
 		}
 
-		GameState gameState = GameManager.INSTANCE.getGame().getGameState();
 		if(gameState == GameState.WAITING || gameState == GameState.ENDED) return;
 
 		killPlayer(event.getPlayer());

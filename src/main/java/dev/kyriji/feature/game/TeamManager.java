@@ -38,6 +38,16 @@ public class TeamManager {
 		team.addEntry(lifeLink.getPlayerTwo().getName());
 	}
 
+	public void removeTeam(LifeLink lifeLink) {
+		String teamName = "team_" + (lifeLink.getPlayerOne().getUniqueId().toString().substring(0, 5)) +
+				"_" + (lifeLink.getPlayerTwo().getUniqueId().toString().substring(0, 5));
+
+		Team team = scoreboard.getTeam(teamName);
+		if (team != null) {
+			team.unregister();
+		}
+	}
+
 	public ChatColor getTeamColor() {
 		List<ChatColor> colors = getTeamColors();
 		if (colorIndex >= colors.size()) colorIndex = 0;
