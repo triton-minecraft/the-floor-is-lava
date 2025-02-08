@@ -16,7 +16,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BaseBlock;
-import dev.kyriji.feature.game.WorldManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.io.File;
@@ -27,6 +27,9 @@ import java.util.Set;
 
 public class SchematicUtils {
 	public static void pasteSchematic(File schematicFile, Location location) {
+		System.out.println(Bukkit.getWorlds());
+		System.out.println(location.getWorld());
+
 		World world = new BukkitWorld(Objects.requireNonNull(location.getWorld()));
 
 		try (EditSession editSession = WorldEdit.getInstance().newEditSession(world)) {

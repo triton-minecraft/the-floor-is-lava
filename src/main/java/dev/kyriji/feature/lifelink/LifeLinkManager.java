@@ -1,6 +1,7 @@
 package dev.kyriji.feature.lifelink;
 
 import dev.kyriji.TheFloorIsLava;
+import dev.kyriji.feature.game.TeamManager;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -27,6 +28,7 @@ public class LifeLinkManager {
 	}
 
 	public static void registerLifeLink(LifeLink lifeLink) {
+		TeamManager.INSTANCE.addTeam(lifeLink);
 		setGlowing(lifeLink, true);
 		lifeLinks.add(lifeLink);
 	}
