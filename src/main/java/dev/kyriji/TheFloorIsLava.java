@@ -5,6 +5,7 @@ import dev.kyriji.command.LifeLinkCommand;
 import dev.kyriji.feature.chat.ActionBarManager;
 import dev.kyriji.feature.chat.ScoreboardManager;
 import dev.kyriji.feature.effect.BossBarManager;
+import dev.kyriji.feature.effect.EffectUtils;
 import dev.kyriji.feature.game.GameListener;
 import dev.kyriji.feature.game.GameManager;
 import dev.kyriji.feature.game.TeamManager;
@@ -44,6 +45,8 @@ public final class TheFloorIsLava extends JavaPlugin {
 			new TeamManager();
 
 			WorldManager.pasteLobbySchematic();
+
+			EffectUtils.spawnHolograms();
 		});
 
 		try {

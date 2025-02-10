@@ -18,6 +18,8 @@ public class WorldManager {
 	public static final Location LOBBY_SCHEMATIC_LOCATION = new Location(getLobbyWorld(), 0, 76, 0);
 	public static final Location LOBBY_SPAWN = new Location(getLobbyWorld(), 0.5, 78, 0.5);
 
+	public static final Location LOBBY_HOLOGRAM_SPAWN = new Location(getLobbyWorld(), 0.5, 90, 30.5, 180, 0);
+
 	public static void init() {
 		getWorld().getWorldBorder().setCenter(0, 0);
 		getWorld().getWorldBorder().setSize(150);

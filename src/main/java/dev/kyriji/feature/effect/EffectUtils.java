@@ -2,13 +2,16 @@ package dev.kyriji.feature.effect;
 
 import dev.kyriji.TheFloorIsLava;
 import dev.kyriji.feature.world.WorldManager;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Transformation;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,5 +56,28 @@ public class EffectUtils {
 				launches--;
 			}
 		}.runTaskTimer(TheFloorIsLava.INSTANCE, 0, 1);
+	}
+
+	public static void spawnHolograms() {
+		TextDisplay textDisplay = (TextDisplay) WorldManager.getLobbyWorld().spawnEntity(WorldManager.LOBBY_HOLOGRAM_SPAWN, EntityType.TEXT_DISPLAY);
+		textDisplay.setText(ChatColor.GOLD + "" + ChatColor.BOLD + "The Floor is Lava!");
+		textDisplay.setGravity(false);
+		textDisplay.setAlignment(TextDisplay.TextAlignment.CENTER);
+
+		Vector3f translation = new Vector3f(0, 0, 0);
+		Vector3f scale = new Vector3f(10, 10, 10);
+		AxisAngle4f rightRotation = new AxisAngle4f(0, 0, 0, 0);
+		AxisAngle4f leftRotation = new AxisAngle4f(0, 0, 0, 0);
+		textDisplay.setTransformation(new Transformation(translation, leftRotation, scale, rightRotation));
+
+		String instructions = ChatColor.translateAlternateColorCodes('&', "&7This game is played with a &dPartner&7.\n" +
+				"&7Use &f/lifelink <player>&7 to link with someone.");
+
+		TextDisplay instructionsDisplay = (TextDisplay) WorldManager.getLobbyWorld().spawnEntity(WorldManager.LOBBY_HOLOGRAM_SPAWN.clone().add(0, -8, 0), EntityType.TEXT_DISPLAY);
+		instructionsDisplay.setText(instructions);
+		instructionsDisplay.setGravity(false);
+		instructionsDisplay.setAlignment(TextDisplay.TextAlignment.CENTER);
+		scale = new Vector3f(7, 7, 7);
+		instructionsDisplay.setTransformation(new Transformation(translation, leftRotation, scale, rightRotation));
 	}
 }
