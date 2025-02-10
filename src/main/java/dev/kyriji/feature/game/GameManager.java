@@ -17,10 +17,7 @@ import dev.kyriji.feature.world.WorldManager;
 import dev.wiji.bigminecraftapi.BigMinecraftAPI;
 import dev.wiji.bigminecraftapi.controllers.NetworkManager;
 import dev.wiji.bigminecraftapi.enums.InstanceState;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -265,7 +262,10 @@ public class GameManager {
 
 	public void spawnPlayers() {
 		game.getAlivePlayers().forEach(player -> {
-			player.teleport(WorldManager.MAP_SPAWN);
+			Location spawnLocation = WorldManager.MAP_SPAWN.clone();
+			spawnLocation.add(Math.random() * 10 - 5, 0, Math.random() * 10 - 5);
+
+			player.teleport(spawnLocation);
 			player.setGameMode(GameMode.SURVIVAL);
 
 			player.getInventory().setChestplate(new ItemStack(Material.ELYTRA));
