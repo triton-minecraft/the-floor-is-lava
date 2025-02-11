@@ -6,28 +6,35 @@ import dev.kyriji.feature.chat.ScoreboardManager;
 import dev.kyriji.feature.effect.BossBarManager;
 import dev.kyriji.feature.game.enums.GameState;
 import dev.kyriji.feature.game.model.Game;
+import dev.kyriji.feature.game.model.GameEvent;
 import dev.kyriji.feature.lifelink.LifeLink;
 import dev.kyriji.feature.lifelink.LifeLinkManager;
 import dev.kyriji.feature.world.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
+
+import java.util.List;
 
 public class GameListener implements Listener {
 
@@ -44,7 +51,10 @@ public class GameListener implements Listener {
 		Game game = GameManager.INSTANCE.getGame();
 		GameState gameState = game.getGameState();
 
-		if(gameState != GameState.DEATH_MATCH) event.setCancelled(true);
+		GameEvent currentEvent = game.getCurrentEvent();
+		boolean isPvpEvent = currentEvent != null && currentEvent == EventManager.INSTANCE.getEvent("pvp");
+
+		if(gameState != GameState.DEATH_MATCH && !isPvpEvent) event.setCancelled(true);
 	}
 
 	@EventHandler
@@ -56,7 +66,6 @@ public class GameListener implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		System.out.println("Player joined");
 		event.setJoinMessage(null);
 
 		WorldManager.init();
@@ -127,7 +136,11 @@ public class GameListener implements Listener {
 
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent event) {
-		if(event.getPlayer().getWorld() == WorldManager.getLobbyWorld()) event.setCancelled(true);
+		int y = event.getBlock().getY();
+		int currentLavaLevel = GameManager.INSTANCE.getGame().getLavaLevel();
+
+		if(event.getPlayer().getWorld() == WorldManager.getLobbyWorld() || y < currentLavaLevel) event.setCancelled(true);
+
 	}
 
 	@EventHandler
@@ -137,7 +150,13 @@ public class GameListener implements Listener {
 
 	@EventHandler
 	public void onDamage(EntityDamageEvent event) {
-		if(event.getEntity().getWorld() == WorldManager.getLobbyWorld()) event.setCancelled(true);
+		if(event.getEntity().getWorld() == WorldManager.getLobbyWorld()) {
+			event.setCancelled(true);
+
+			if(event.getDamageSource().getDamageType() == DamageType.OUT_OF_WORLD) {
+				event.getEntity().teleport(WorldManager.LOBBY_SPAWN);
+			}
+		}
 	}
 
 	@EventHandler
@@ -148,6 +167,18 @@ public class GameListener implements Listener {
 	@EventHandler
 	public void onRespawn(PlayerRespawnEvent event) {
 		event.setRespawnLocation(WorldManager.MAP_SPAWN);
+	}
+
+	@EventHandler
+	public void onChestOpen(PlayerInteractEvent event) {
+		List<Player> alivePlayers = GameManager.INSTANCE.getGame().getAlivePlayers();
+
+		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+		if(event.getClickedBlock().getType() != Material.CHEST) return;
+		if(alivePlayers.contains(event.getPlayer())) return;
+
+		event.setCancelled(true);
 	}
 	
 	public void killPlayer(Player player) {

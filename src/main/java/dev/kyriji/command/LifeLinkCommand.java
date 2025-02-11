@@ -2,13 +2,16 @@ package dev.kyriji.command;
 
 import dev.kyriji.feature.game.GameManager;
 import dev.kyriji.feature.game.enums.GameState;
+import dev.kyriji.feature.game.model.AirDrop;
 import dev.kyriji.feature.lifelink.InviteManager;
 import dev.kyriji.feature.lifelink.LifeLinkManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.A;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -22,7 +25,6 @@ public class LifeLinkCommand implements CommandExecutor {
 			sender.sendMessage("You must be a player to use this command!");
 			return false;
 		}
-
 
 		if(args.length != 1) {
 			player.sendMessage(ChatColor.RED + "Usage: /lifelink <player>");

@@ -13,11 +13,13 @@ import java.util.List;
 public class Game {
 	private GameState gameState = GameState.WAITING;
 	private final List<Player> alivePlayers;
+	private GameEvent currentEvent;
 
 	private int lavaLevel = -64;
 
 	public Game() {
 		this.alivePlayers = new ArrayList<>();
+		this.currentEvent = null;
 
 		Bukkit.getOnlinePlayers().forEach(this::addPlayer);
 	}
@@ -50,5 +52,17 @@ public class Game {
 
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
+	}
+
+	public GameEvent getCurrentEvent() {
+		return currentEvent;
+	}
+
+	public String getCurrentEventString() {
+		return currentEvent == null ? "&cNone" : currentEvent.getDisplayName();
+	}
+
+	public void setCurrentEvent(GameEvent event) {
+		this.currentEvent = event;
 	}
 }

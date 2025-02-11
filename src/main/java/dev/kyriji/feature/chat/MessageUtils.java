@@ -1,5 +1,7 @@
 package dev.kyriji.feature.chat;
 
+import dev.kyriji.feature.game.model.Game;
+import dev.kyriji.feature.game.model.GameEvent;
 import org.bukkit.Bukkit;
 
 public class MessageUtils {
@@ -34,5 +36,14 @@ public class MessageUtils {
 		Bukkit.getOnlinePlayers().forEach(player -> {
 			player.sendTitle(LuckPermsManager.formatMessage(title), null, 10, 70, 20);
 		});
+	}
+
+	public static void sendEventMessage(GameEvent event) {
+		Bukkit.broadcastMessage(LuckPermsManager.formatMessage("&7&m                                            &r"));
+		Bukkit.broadcastMessage(LuckPermsManager.formatMessage("&a&lRANDOM EVENT"));
+		Bukkit.broadcastMessage(LuckPermsManager.formatMessage("&r"));
+		Bukkit.broadcastMessage(LuckPermsManager.formatMessage(event.getDisplayName()));
+		event.getDescription().forEach(description -> Bukkit.broadcastMessage(LuckPermsManager.formatMessage(description)));
+		Bukkit.broadcastMessage(LuckPermsManager.formatMessage("&7&m                                            &r"));
 	}
 }

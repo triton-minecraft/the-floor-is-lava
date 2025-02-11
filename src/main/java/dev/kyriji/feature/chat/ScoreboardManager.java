@@ -1,5 +1,6 @@
 package dev.kyriji.feature.chat;
 
+import com.sk89q.worldedit.util.formatting.text.format.TextColor;
 import dev.kyriji.TheFloorIsLava;
 import dev.kyriji.feature.chat.model.KeyValueSidebarComponent;
 import dev.kyriji.feature.chat.model.ValueSidebarComponent;
@@ -78,6 +79,11 @@ public class ScoreboardManager {
 				.addDynamicLine(() -> Component.text(dtf.format(new Date()), NamedTextColor.GRAY))
 				.addBlankLine()
 				.addComponent(new ValueSidebarComponent(() -> GameManager.INSTANCE.getGame().getGameState().getDisplayName()))
+				.addBlankLine()
+				.addDynamicLine(() -> Component.text("Event: ")
+						.append(Component.text(LuckPermsManager.formatMessage(GameManager.INSTANCE.getGame().getCurrentEventString()))))
+				.addDynamicLine(() -> Component.text(LuckPermsManager.formatMessage("Next Event: "))
+						.append(Component.text(LuckPermsManager.formatMessage("&a" + GameManager.INSTANCE.getNextEventTime()))))
 				.addBlankLine()
 				.addComponent(new KeyValueSidebarComponent(
 						Component.text("Alive players"),

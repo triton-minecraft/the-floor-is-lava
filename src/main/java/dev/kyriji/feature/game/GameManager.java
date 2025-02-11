@@ -8,6 +8,7 @@ import dev.kyriji.feature.effect.BossBarManager;
 import dev.kyriji.feature.effect.EffectUtils;
 import dev.kyriji.feature.game.enums.GameState;
 import dev.kyriji.feature.game.model.Game;
+import dev.kyriji.feature.game.model.GameEvent;
 import dev.kyriji.feature.lifelink.LifeLink;
 import dev.kyriji.feature.lifelink.LifeLinkManager;
 import dev.kyriji.feature.sound.SoundUtils;
@@ -25,7 +26,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.Score;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,14 +34,17 @@ import java.util.List;
 public class GameManager {
 	public static GameManager INSTANCE;
 
-	public static final int START_TIMER_SECONDS = 30;
+	public static final int START_TIMER_SECONDS = 1;
 	public static final int GRACE_PERIOD_MINUTES = 1;
 	public static final int LAVA_RISE_INTERVAL_SECONDS = 1;
 	public static final int DEATH_MATCH_MINUTES = 1;
 	public static final int MAX_LAVA_LEVEL = 317;
+	public static final int RANDOM_EVENT_SECONDS = 30;
 
 	private final Game game;
 	private BukkitTask gameTask;
+
+	private int randomEventSeconds = RANDOM_EVENT_SECONDS;
 
 	public GameManager(Game game) {
 		INSTANCE = this;
@@ -157,24 +160,43 @@ public class GameManager {
 		game.setGameState(GameState.RISING_LAVA);
 
 		gameTask = new BukkitRunnable() {
-			int seconds = LAVA_RISE_INTERVAL_SECONDS;
+			int lavaRiseSeconds = LAVA_RISE_INTERVAL_SECONDS;
 			int totalSeconds = 0;
 
 			@Override
 			public void run() {
-				seconds--;
+				lavaRiseSeconds--;
+				randomEventSeconds--;
 				totalSeconds++;
 
-				bossBar.setProgress(Math.min(1.0, (double) totalSeconds / (MAX_LAVA_LEVEL * LAVA_RISE_INTERVAL_SECONDS)));
+				bossBar.setProgress(Math.min(1.0, (double) totalSeconds / ((MAX_LAVA_LEVEL + 64) * LAVA_RISE_INTERVAL_SECONDS)));
 
-				if(seconds <= 0) {
+				if(lavaRiseSeconds <= 0) {
 					if(game.getLavaLevel() >= MAX_LAVA_LEVEL) {
 						cancel();
 						startDeathMatch();
 					}
 
-					seconds = LAVA_RISE_INTERVAL_SECONDS;
+					lavaRiseSeconds = LAVA_RISE_INTERVAL_SECONDS;
 					game.riseLava();
+				}
+
+				if(randomEventSeconds <= 0) {
+					randomEventSeconds = RANDOM_EVENT_SECONDS;
+					GameEvent currentEvent = game.getCurrentEvent();
+
+					if(currentEvent != null) {
+						currentEvent.end();
+						game.setCurrentEvent(null);
+					}
+
+					GameEvent newEvent = EventManager.INSTANCE.getRandomEvent();
+					game.setCurrentEvent(newEvent);
+					newEvent.start();
+
+					MessageUtils.broadcastTitle(newEvent.getDisplayName());
+					MessageUtils.sendEventMessage(newEvent);
+					SoundUtils.broadcastSound(GameSound.ALERT);
 				}
 			}
 		}.runTaskTimer(TheFloorIsLava.INSTANCE, 0, 20);
@@ -218,6 +240,8 @@ public class GameManager {
 		for(Player alivePlayer : game.getAlivePlayers()) {
 			LifeLink lifeLink = LifeLinkManager.getLifeLink(alivePlayer);
 			if(lifeLink != null && !winners.contains(lifeLink)) winners.add(lifeLink);
+
+			alivePlayer.setGameMode(GameMode.SPECTATOR);
 		}
 
 		StringBuilder winnersMessage = new StringBuilder();
@@ -278,5 +302,14 @@ public class GameManager {
 				}
 			}.runTaskLater(TheFloorIsLava.INSTANCE, 20);
 		});
+	}
+
+	public String getNextEventTime() {
+		GameState gameState = game.getGameState();
+		if(gameState == GameState.GRACE_PERIOD) return "N/A";
+
+		int minutes = randomEventSeconds / 60;
+		int seconds = randomEventSeconds % 60;
+		return String.format("%02d:%02d", minutes, seconds);
 	}
 }
