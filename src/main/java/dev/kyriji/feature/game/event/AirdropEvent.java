@@ -43,8 +43,11 @@ public class AirdropEvent implements GameEvent {
 		Location secondCorner = WorldManager.SECOND_CORNER;
 
 		for(int i = 0; i < 5; i++) {
-			int x = (int) (firstCorner.getX() + Math.random() * (secondCorner.getX() - firstCorner.getX()));
-			int z = (int) (firstCorner.getZ() + Math.random() * (secondCorner.getZ() - firstCorner.getZ()));
+			double x = (int) (firstCorner.getX() + Math.random() * (secondCorner.getX() - firstCorner.getX()));
+			double z = (int) (firstCorner.getZ() + Math.random() * (secondCorner.getZ() - firstCorner.getZ()));
+			x += 0.5;
+			z += 0.5;
+
 			Location location = new Location(firstCorner.getWorld(), x, 350, z);
 
 			AirDrop airDrop = new AirDrop(location);

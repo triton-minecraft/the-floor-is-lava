@@ -10,7 +10,7 @@ import java.io.File;
 
 public class WorldManager {
 	public static final Location FIRST_CORNER = new Location(getWorld(), 74, 0, 74);
-	public static final Location SECOND_CORNER = new Location(getWorld(), -75, 0, -75);
+	public static final Location SECOND_CORNER = new Location(getWorld(), -76, 0, -76);
 
 	public static final Location MAP_SPAWN = new Location(getWorld(), 0, 300, 0);
 	public static final Location MAP_SCHEMATIC_LOCATION = new Location(getWorld(), 0, -64, 0);
@@ -21,8 +21,8 @@ public class WorldManager {
 	public static final Location LOBBY_HOLOGRAM_SPAWN = new Location(getLobbyWorld(), 0.5, 90, 30.5, 180, 0);
 
 	public static void init() {
-		getWorld().getWorldBorder().setCenter(0, 0);
-		getWorld().getWorldBorder().setSize(150);
+		getWorld().getWorldBorder().setCenter(-0.5, -0.5);
+		getWorld().getWorldBorder().setSize(150.5);
 
 		getWorld().setStorm(false);
 		getWorld().setThundering(false);

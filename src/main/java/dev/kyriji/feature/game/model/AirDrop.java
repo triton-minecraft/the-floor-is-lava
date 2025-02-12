@@ -2,6 +2,8 @@ package dev.kyriji.feature.game.model;
 
 import dev.kyriji.TheFloorIsLava;
 import dev.kyriji.feature.world.WorldManager;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,9 +17,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AirDrop implements Listener {
 	public Location spawnLocation;
@@ -81,7 +90,19 @@ public class AirDrop implements Listener {
 		}
 
 		barrel.setCustomName("Air Drop");
-		barrel.getInventory().addItem(new ItemStack(Material.DIAMOND, 5));
+
+		AirDropLootTable lootTable = new AirDropLootTable();
+
+		List<Integer> chosenNumbers = new ArrayList<>();
+		for(int i = 0; i < 3; i++) {
+			ItemStack loot = lootTable.getLoot();
+			int slot = (int) (Math.random() * 27);
+			while(chosenNumbers.contains(slot)) slot = (int) (Math.random() * 27);
+
+			chosenNumbers.add(slot);
+
+			barrel.getInventory().setItem(slot, loot);
+		}
 	}
 
 	@EventHandler
@@ -105,5 +126,50 @@ public class AirDrop implements Listener {
 
 		InventoryCloseEvent.getHandlerList().unregister(this);
 		EntityChangeBlockEvent.getHandlerList().unregister(this);
+	}
+
+	public static class AirDropLootTable {
+		public Map<Integer, ItemStack> lootTable = new HashMap<>();
+
+		public AirDropLootTable() {
+			ItemStack fireResistance = new ItemStack(Material.SPLASH_POTION);
+			PotionMeta potionMeta = (PotionMeta) fireResistance.getItemMeta();
+			potionMeta.setBasePotionType(PotionType.FIRE_RESISTANCE);
+			fireResistance.setItemMeta(potionMeta);
+
+			ItemStack istantHealth = new ItemStack(Material.SPLASH_POTION);
+			PotionMeta potionMeta2 = (PotionMeta) istantHealth.getItemMeta();
+			potionMeta2.setBasePotionType(PotionType.HEALING);
+			istantHealth.setItemMeta(potionMeta2);
+
+			addLoot(10, new ItemStack(Material.DIAMOND, 3));
+			addLoot(20, new ItemStack(Material.GOLD_INGOT, 10));
+			addLoot(30, new ItemStack(Material.IRON_INGOT, 15));
+			addLoot(5, new ItemStack(Material.FIREWORK_ROCKET, 1));
+			addLoot(5, new ItemStack(Material.TRIDENT, 1));
+			addLoot(5, fireResistance);
+			addLoot(15, istantHealth);
+			addLoot(10, new ItemStack(Material.GOLDEN_APPLE, 1));
+			addLoot(20, new ItemStack(Material.COOKED_BEEF, 5));
+			addLoot(20, new ItemStack(Material.COOKED_CHICKEN, 5));
+
+		}
+
+		private void addLoot(int weight, ItemStack item) {
+			lootTable.put(weight, item);
+		}
+
+		public ItemStack getLoot() {
+			int totalWeight = lootTable.keySet().stream().mapToInt(Integer::intValue).sum();
+			int randomWeight = (int) (Math.random() * totalWeight);
+
+			int currentWeight = 0;
+			for(Map.Entry<Integer, ItemStack> entry : lootTable.entrySet()) {
+				currentWeight += entry.getKey();
+				if(randomWeight <= currentWeight) return entry.getValue();
+			}
+
+			return null;
+		}
 	}
 }

@@ -15,6 +15,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.damage.DamageType;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,16 +23,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.entity.*;
+import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 import java.util.List;
@@ -42,6 +38,24 @@ public class GameListener implements Listener {
 	public void onDeath(PlayerDeathEvent event) {
 		event.setDeathMessage(null);
 		killPlayer(event.getEntity());
+	}
+
+	@EventHandler
+	public void onSnowballHit(ProjectileHitEvent event) {
+		if(event.getEntity().getType() != EntityType.SNOWBALL) return;
+		if(event.getHitEntity() == null) return;
+
+		if(!(event.getHitEntity() instanceof Player hitPlayer)) return;
+		hitPlayer.damage(1);
+
+		double knockBackStrength = 1;
+		Vector knockBack = event.getEntity().getVelocity().normalize().multiply(knockBackStrength);
+		hitPlayer.setVelocity(event.getEntity().getVelocity().add(knockBack));
+	}
+
+	@EventHandler
+	public void onPortal(PlayerPortalEvent event) {
+		event.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -67,6 +81,7 @@ public class GameListener implements Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
 		event.setJoinMessage(null);
+		event.getPlayer().setResourcePack("usercontent.smd.gg/ue07jxo");
 
 		WorldManager.init();
 		ScoreboardManager.INSTANCE.addPlayer(event.getPlayer());
@@ -112,7 +127,6 @@ public class GameListener implements Listener {
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		event.setQuitMessage(null);
-		GameManager.INSTANCE.getGame().removePlayer(event.getPlayer());
 		ScoreboardManager.INSTANCE.removePlayer(event.getPlayer());
 
 		LifeLink lifeLink = LifeLinkManager.getLifeLink(event.getPlayer());
@@ -126,6 +140,7 @@ public class GameListener implements Listener {
 		if(gameState == GameState.WAITING || gameState == GameState.ENDED) return;
 
 		killPlayer(event.getPlayer());
+		GameManager.INSTANCE.getGame().removePlayer(event.getPlayer());
 	}
 
 
@@ -180,9 +195,20 @@ public class GameListener implements Listener {
 
 		event.setCancelled(true);
 	}
+
+	@EventHandler
+	public void onGamemodeChange(PlayerGameModeChangeEvent event) {
+		Game game = GameManager.INSTANCE.getGame();
+
+		if(game.getGameState() != GameState.WAITING) return;
+
+		if(event.getNewGameMode() == GameMode.CREATIVE) game.removePlayer(event.getPlayer());
+		else if(event.getNewGameMode() == GameMode.SURVIVAL) game.addPlayer(event.getPlayer());
+	}
 	
 	public void killPlayer(Player player) {
 		Game game = GameManager.INSTANCE.getGame();
+		if(!game.getAlivePlayers().contains(player)) return;
 		game.removePlayer(player);
 
 		String deathMessage = LuckPermsManager.formatMessage(LuckPermsManager.getPlayerDisplayName(player) + " &chas died.");

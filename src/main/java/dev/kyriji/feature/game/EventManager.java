@@ -2,6 +2,14 @@ package dev.kyriji.feature.game;
 
 import dev.kyriji.feature.game.event.*;
 import dev.kyriji.feature.game.model.GameEvent;
+import dev.kyriji.feature.world.WorldManager;
+import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.server.level.ServerPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftPlayer;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +25,10 @@ public class EventManager {
 		events = new ArrayList<>();
 		lastRandomEvent = null;
 
-//		registerEvent(new PvpEvent());
+		registerEvent(new PvpEvent());
 		registerEvent(new AirdropEvent());
-//		registerEvent(new InventorySwapEvent());
-//		registerEvent(new SnowFightEvent());
+		registerEvent(new InventorySwapEvent());
+		registerEvent(new SnowFightEvent());
 		registerEvent(new TntRainEvent());
 	}
 

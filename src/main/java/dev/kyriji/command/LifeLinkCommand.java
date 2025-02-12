@@ -39,6 +39,8 @@ public class LifeLinkCommand implements CommandExecutor {
 
 		if(target.equals(player)) {
 			player.sendMessage(ChatColor.RED + "You can't life link with yourself!");
+			//TODO: Remove this
+			GameManager.INSTANCE.startDeathMatch();
 			return false;
 		}
 

@@ -18,8 +18,13 @@ import dev.kyriji.feature.world.WorldManager;
 import dev.wiji.bigminecraftapi.BigMinecraftAPI;
 import dev.wiji.bigminecraftapi.controllers.NetworkManager;
 import dev.wiji.bigminecraftapi.enums.InstanceState;
+import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
+import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftPlayer;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -34,17 +39,16 @@ import java.util.List;
 public class GameManager {
 	public static GameManager INSTANCE;
 
-	public static final int START_TIMER_SECONDS = 1;
-	public static final int GRACE_PERIOD_MINUTES = 1;
-	public static final int LAVA_RISE_INTERVAL_SECONDS = 1;
-	public static final int DEATH_MATCH_MINUTES = 1;
+	public static final int START_TIMER_SECONDS = 30;
+	public static final int GRACE_PERIOD_MINUTES = 3;
+	public static final int LAVA_RISE_INTERVAL_SECONDS = 3;
+	public static final int DEATH_MATCH_MINUTES = 3;
 	public static final int MAX_LAVA_LEVEL = 317;
-	public static final int RANDOM_EVENT_SECONDS = 30;
 
 	private final Game game;
 	private BukkitTask gameTask;
 
-	private int randomEventSeconds = RANDOM_EVENT_SECONDS;
+	private int randomEventSeconds = getEventRandomSeconds();
 
 	public GameManager(Game game) {
 		INSTANCE = this;
@@ -182,7 +186,7 @@ public class GameManager {
 				}
 
 				if(randomEventSeconds <= 0) {
-					randomEventSeconds = RANDOM_EVENT_SECONDS;
+					randomEventSeconds = getEventRandomSeconds();
 					GameEvent currentEvent = game.getCurrentEvent();
 
 					if(currentEvent != null) {
@@ -202,12 +206,13 @@ public class GameManager {
 		}.runTaskTimer(TheFloorIsLava.INSTANCE, 0, 20);
 	}
 
-	private void startDeathMatch() {
+	public void startDeathMatch() {
 		BossBarManager bossBar = BossBarManager.INSTANCE;
 		bossBar.setTitle(ChatColor.RED + "" + ChatColor.BOLD + "DEATH MATCH");
 		bossBar.setColor(org.bukkit.boss.BarColor.RED);
 		SoundUtils.broadcastSound(GameSound.DEATH_MATCH);
 
+		spawnEnderDragon();
 		MessageUtils.sendDeathmatchMessage();
 
 		game.setGameState(GameState.DEATH_MATCH);
@@ -311,5 +316,21 @@ public class GameManager {
 		int minutes = randomEventSeconds / 60;
 		int seconds = randomEventSeconds % 60;
 		return String.format("%02d:%02d", minutes, seconds);
+	}
+
+	public void spawnEnderDragon() {
+		Location spawn = WorldManager.MAP_SPAWN;
+		EnderDragon dragon = (EnderDragon) spawn.getWorld().spawnEntity(spawn, EntityType.ENDER_DRAGON);
+		dragon.setPhase(EnderDragon.Phase.CHARGE_PLAYER);
+
+		ClientboundBossEventPacket packet = ClientboundBossEventPacket.createRemovePacket(dragon.getUniqueId());
+		Bukkit.getOnlinePlayers().forEach(player -> {
+			ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+			serverPlayer.connection.send(packet);
+		});
+	}
+
+	private int getEventRandomSeconds() {
+		return (int) (Math.random() * 60) + 30;
 	}
 }
