@@ -20,9 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -81,7 +79,7 @@ public class GameListener implements Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
 		event.setJoinMessage(null);
-		event.getPlayer().setResourcePack("usercontent.smd.gg/ue07jxo");
+		event.getPlayer().setResourcePack("https://www.dropbox.com/scl/fi/2eczbh26vnazelc9u0gzf/TMC-Valentine-s-Day-Texture-Pack.zip?rlkey=hkt8lghbe3s902jxk6rnb7app&st=sh5tq7ca&dl=1");
 
 		WorldManager.init();
 		ScoreboardManager.INSTANCE.addPlayer(event.getPlayer());
@@ -125,6 +123,28 @@ public class GameListener implements Listener {
 	}
 
 	@EventHandler
+	public void onBlockFall(EntityChangeBlockEvent event) {
+		if(event.getBlock().getBlockData().getMaterial() == Material.GRAVEL) event.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onBlockForm(BlockFormEvent event) {
+		Material blockType = event.getBlock().getType();
+		if(blockType == Material.OBSIDIAN || blockType == Material.COBBLESTONE) event.setCancelled(true);
+	}
+
+	@EventHandler
+	public void one(EntityBlockFormEvent event) {
+		Material blockType = event.getBlock().getType();
+		if(blockType == Material.GRAVEL) event.setCancelled(true);
+	}
+
+	@EventHandler
+	public void stopLiquids(BlockFromToEvent event) {
+		if(event.getBlock().getBlockData().getMaterial() == Material.LAVA) event.setCancelled(true);
+	}
+
+	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		event.setQuitMessage(null);
 		ScoreboardManager.INSTANCE.removePlayer(event.getPlayer());
@@ -133,8 +153,9 @@ public class GameListener implements Listener {
 
 		GameState gameState = GameManager.INSTANCE.getGame().getGameState();
 
-		if(lifeLink != null && gameState == GameState.WAITING) {
-			LifeLinkManager.removeLifeLink(lifeLink);
+		if(gameState == GameState.WAITING) {
+			if(lifeLink != null) LifeLinkManager.removeLifeLink(lifeLink);
+			GameManager.INSTANCE.getGame().removePlayer(event.getPlayer());
 		}
 
 		if(gameState == GameState.WAITING || gameState == GameState.ENDED) return;
@@ -218,17 +239,21 @@ public class GameListener implements Listener {
 		GameState gameState = game.getGameState();
 		player.setGameMode(GameMode.SPECTATOR);
 
-		if(gameState == GameState.WAITING || gameState == GameState.ENDED) return;
+		LifeLink lifeLink = LifeLinkManager.getLifeLink(player);
+		if(lifeLink != null) {
+			Player otherPlayer = lifeLink.getPlayerOne().equals(player) ? lifeLink.getPlayerTwo() : lifeLink.getPlayerOne();
+			killPlayer(otherPlayer);
+		}
 
-		if(game.getAlivePlayers().size() > 2) return;
+		if(gameState == GameState.WAITING || gameState == GameState.ENDED) return;
 
 		int lifeLinkCount = 0;
 		for(Player alivePlayer : game.getAlivePlayers()) {
-			LifeLink lifeLink = LifeLinkManager.getLifeLink(alivePlayer);
-			if(lifeLink != null) lifeLinkCount++;
+			LifeLink playerLifeLink = LifeLinkManager.getLifeLink(alivePlayer);
+			if(playerLifeLink != null) lifeLinkCount++;
 		}
 
-		if(lifeLinkCount <= 1) {
+		if(lifeLinkCount <= 2) {
 			new BukkitRunnable() {
 				@Override
 				public void run() {

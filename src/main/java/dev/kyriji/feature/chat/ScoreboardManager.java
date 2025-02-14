@@ -86,6 +86,11 @@ public class ScoreboardManager {
 						.append(Component.text(LuckPermsManager.formatMessage("&a" + GameManager.INSTANCE.getNextEventTime()))))
 				.addBlankLine()
 				.addComponent(new KeyValueSidebarComponent(
+						Component.text("Lava Level"),
+						() -> Component.text(GameManager.INSTANCE.getGame().getLavaLevel(), NamedTextColor.GOLD)
+				))
+				.addBlankLine()
+				.addComponent(new KeyValueSidebarComponent(
 						Component.text("Alive players"),
 						() -> Component.text(GameManager.INSTANCE.getGame().getAlivePlayers().size(), NamedTextColor.GREEN)
 				))

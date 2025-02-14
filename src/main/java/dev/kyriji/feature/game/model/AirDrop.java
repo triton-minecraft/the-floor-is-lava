@@ -1,15 +1,11 @@
 package dev.kyriji.feature.game.model;
 
 import dev.kyriji.TheFloorIsLava;
-import dev.kyriji.feature.world.WorldManager;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.level.storage.loot.LootTable;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
@@ -19,6 +15,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -134,7 +132,7 @@ public class AirDrop implements Listener {
 		public AirDropLootTable() {
 			ItemStack fireResistance = new ItemStack(Material.SPLASH_POTION);
 			PotionMeta potionMeta = (PotionMeta) fireResistance.getItemMeta();
-			potionMeta.setBasePotionType(PotionType.FIRE_RESISTANCE);
+			potionMeta.addCustomEffect(PotionEffectType.FIRE_RESISTANCE.createEffect(20, 0), true);
 			fireResistance.setItemMeta(potionMeta);
 
 			ItemStack istantHealth = new ItemStack(Material.SPLASH_POTION);

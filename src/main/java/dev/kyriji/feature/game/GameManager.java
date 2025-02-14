@@ -41,8 +41,8 @@ public class GameManager {
 
 	public static final int START_TIMER_SECONDS = 30;
 	public static final int GRACE_PERIOD_MINUTES = 3;
-	public static final int LAVA_RISE_INTERVAL_SECONDS = 3;
-	public static final int DEATH_MATCH_MINUTES = 3;
+	public static final int LAVA_RISE_INTERVAL_SECONDS = 2;
+	public static final int DEATH_MATCH_MINUTES = 2;
 	public static final int MAX_LAVA_LEVEL = 317;
 
 	private final Game game;
@@ -320,13 +320,17 @@ public class GameManager {
 
 	public void spawnEnderDragon() {
 		Location spawn = WorldManager.MAP_SPAWN;
-		EnderDragon dragon = (EnderDragon) spawn.getWorld().spawnEntity(spawn, EntityType.ENDER_DRAGON);
-		dragon.setPhase(EnderDragon.Phase.CHARGE_PLAYER);
 
-		ClientboundBossEventPacket packet = ClientboundBossEventPacket.createRemovePacket(dragon.getUniqueId());
-		Bukkit.getOnlinePlayers().forEach(player -> {
-			ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
-			serverPlayer.connection.send(packet);
+		GameManager.INSTANCE.getGame().getAlivePlayers().forEach(player -> {
+			EnderDragon dragon = (EnderDragon) spawn.getWorld().spawnEntity(spawn, EntityType.ENDER_DRAGON);
+			dragon.setPhase(EnderDragon.Phase.BREATH_ATTACK);
+			dragon.setTarget(player);
+
+			ClientboundBossEventPacket packet = ClientboundBossEventPacket.createRemovePacket(dragon.getUniqueId());
+			Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
+				ServerPlayer serverPlayer = ((CraftPlayer) onlinePlayer).getHandle();
+				serverPlayer.connection.send(packet);
+			});
 		});
 	}
 

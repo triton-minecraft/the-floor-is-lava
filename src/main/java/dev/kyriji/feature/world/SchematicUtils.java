@@ -10,18 +10,25 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.block.BaseBlock;
+import com.sk89q.worldedit.world.block.BlockState;
+import com.sk89q.worldedit.world.registry.BlockMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,23 +59,24 @@ public class SchematicUtils {
 	}
 
 	public static void setLayerToLava(int y, boolean replace) {
+		Location firstCorner = WorldManager.FIRST_CORNER;
+		Location secondCorner = WorldManager.SECOND_CORNER;
 
-		assert WorldManager.getWorld() != null;
-		World world = new BukkitWorld(WorldManager.getWorld());
+		org.bukkit.World world = firstCorner.getWorld();
 
-		BlockVector3 pos1 = BlockVector3.at(WorldManager.FIRST_CORNER.getX(), y, WorldManager.FIRST_CORNER.getZ());
-		BlockVector3 pos2 = BlockVector3.at(WorldManager.SECOND_CORNER.getX(), y, WorldManager.SECOND_CORNER.getZ());
+		for(int x = (int) secondCorner.getX(); x <= firstCorner.getX(); x++) {
+			for(int z = (int) secondCorner.getZ(); z <= firstCorner.getZ(); z++) {
 
-		try (EditSession editSession = WorldEdit.getInstance().newEditSession(world)) {
-			Region region = new CuboidRegion(pos1, pos2);
-			BlockPattern blockPattern = new BlockPattern(editSession.getBlock(pos1));
-			blockPattern.setBlock(BaseBlock.getState(11, 0));
+				Block block = world.getBlockAt(x, y, z);
+				block.getChunk().setForceLoaded(true);
 
-			Set<BaseBlock> blocks = Set.of(new BaseBlock(BaseBlock.getState(0, 0)));
-			if(replace) editSession.replaceBlocks(region, blocks, blockPattern);
-			else editSession.setBlocks(region, blockPattern);
+				if(replace) {
+					if(block.getBlockData().getMaterial().isAir()) world.getBlockAt(x, y, z).setType(Material.LAVA);
+					System.out.println(x + " " + y + " " + z + " " + block.getBlockData().getMaterial());
+				}
+				else  world.getBlockAt(x, y, z).setType(Material.LAVA);
 
-			editSession.flushQueue();
+			}
 		}
 	}
 }

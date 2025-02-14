@@ -39,7 +39,7 @@ public class GameCommand implements CommandExecutor {
 		}
 
 		List<Player> unLinkedPlayers = new ArrayList<>();
-		Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
+		GameManager.INSTANCE.getGame().getAlivePlayers().forEach(onlinePlayer -> {
 			LifeLink lifeLink = LifeLinkManager.getLifeLink(onlinePlayer);
 			if (lifeLink == null) unLinkedPlayers.add(onlinePlayer);
 		});
@@ -52,11 +52,10 @@ public class GameCommand implements CommandExecutor {
 			return false;
 		}
 
-		//TODO: Re-enable this check
-//		if(LifeLinkManager.lifeLinks.size() < 2) {
-//			player.sendMessage(ChatColor.RED + "There must be at least 2 life links to start the game!");
-//			return false;
-//		}
+		if(LifeLinkManager.lifeLinks.size() < 2) {
+			player.sendMessage(ChatColor.RED + "There must be at least 2 life links to start the game!");
+			return false;
+		}
 
 		GameManager.INSTANCE.startGame();
 		player.sendMessage(ChatColor.GREEN + "Game started!");

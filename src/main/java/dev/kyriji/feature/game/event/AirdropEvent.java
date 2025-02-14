@@ -24,7 +24,7 @@ public class AirdropEvent implements GameEvent {
 
 	@Override
 	public String getIdentifier() {
-		return "";
+		return "airdrop";
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class AirdropEvent implements GameEvent {
 				WorldManager.getWorld().getEntities().forEach(entity -> {
 					if(entity.getType() != EntityType.FALLING_BLOCK) return;
 
-					entity.setVelocity(entity.getVelocity().setY(-0.75));
+					entity.setVelocity(entity.getVelocity().setY(-0.5));
 				});
 			}
 		}.runTaskTimer(TheFloorIsLava.INSTANCE, 0L, 1L);

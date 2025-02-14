@@ -30,7 +30,7 @@ public class TntRainEvent implements GameEvent {
 		Location firstCorner = WorldManager.FIRST_CORNER;
 		Location secondCorner = WorldManager.SECOND_CORNER;
 
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 150; i++) {
 			double x = firstCorner.getX() + Math.random() * (secondCorner.getX() - firstCorner.getX());
 			double z = firstCorner.getZ() + Math.random() * (secondCorner.getZ() - firstCorner.getZ());
 			Location location = new Location(firstCorner.getWorld(), x, 350, z);
