@@ -15,7 +15,7 @@ public class LifeLinkListener implements Listener {
 	private final Set<UUID> processingDamage = new HashSet<>();
 	private final Set<UUID> processingHeal = new HashSet<>();
 
-	@EventHandler
+	@EventHandler(ignoreCancelled = true)
 	public void onDamage(EntityDamageEvent event) {
 		if(!(event.getEntity() instanceof Player player)) return;
 

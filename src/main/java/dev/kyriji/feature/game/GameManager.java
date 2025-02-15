@@ -26,6 +26,7 @@ import org.bukkit.craftbukkit.v1_21_R2.entity.CraftPlayer;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wither;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -42,7 +43,7 @@ public class GameManager {
 	public static final int START_TIMER_SECONDS = 30;
 	public static final int GRACE_PERIOD_MINUTES = 3;
 	public static final int LAVA_RISE_INTERVAL_SECONDS = 2;
-	public static final int DEATH_MATCH_MINUTES = 2;
+	public static final int DEATH_MATCH_MINUTES = 5;
 	public static final int MAX_LAVA_LEVEL = 317;
 
 	private final Game game;
@@ -120,6 +121,20 @@ public class GameManager {
 				seconds--;
 			}
 		}.runTaskTimer(TheFloorIsLava.INSTANCE, 0, 20);
+	}
+
+	public void cancelStartTimer() {
+		if(gameTask == null || game.getGameState() != GameState.WAITING) return;
+
+		gameTask.cancel();
+		gameTask = null;
+
+		BossBarManager bossBar = BossBarManager.INSTANCE;
+		bossBar.setTitle(ChatColor.AQUA + "" + ChatColor.BOLD + "WAITING FOR PLAYERS");
+		bossBar.setColor(BarColor.BLUE);
+		bossBar.setProgress(1.0);
+
+		game.setGameState(GameState.WAITING);
 	}
 
 	private void broadcastStartTimer(String message) {
@@ -212,7 +227,7 @@ public class GameManager {
 		bossBar.setColor(org.bukkit.boss.BarColor.RED);
 		SoundUtils.broadcastSound(GameSound.DEATH_MATCH);
 
-		spawnEnderDragon();
+		spawnWithers();
 		MessageUtils.sendDeathmatchMessage();
 
 		game.setGameState(GameState.DEATH_MATCH);
@@ -318,15 +333,16 @@ public class GameManager {
 		return String.format("%02d:%02d", minutes, seconds);
 	}
 
-	public void spawnEnderDragon() {
+	public void spawnWithers() {
 		Location spawn = WorldManager.MAP_SPAWN;
 
-		GameManager.INSTANCE.getGame().getAlivePlayers().forEach(player -> {
-			EnderDragon dragon = (EnderDragon) spawn.getWorld().spawnEntity(spawn, EntityType.ENDER_DRAGON);
-			dragon.setPhase(EnderDragon.Phase.BREATH_ATTACK);
-			dragon.setTarget(player);
+		Location witherSpawn = spawn.clone().add(0, 30, 0);
 
-			ClientboundBossEventPacket packet = ClientboundBossEventPacket.createRemovePacket(dragon.getUniqueId());
+		GameManager.INSTANCE.getGame().getAlivePlayers().forEach(player -> {
+			Wither wither = (Wither) witherSpawn.getWorld().spawnEntity(witherSpawn, EntityType.WITHER);
+			wither.setTarget(player);
+
+			ClientboundBossEventPacket packet = ClientboundBossEventPacket.createRemovePacket(wither.getUniqueId());
 			Bukkit.getOnlinePlayers().forEach(onlinePlayer -> {
 				ServerPlayer serverPlayer = ((CraftPlayer) onlinePlayer).getHandle();
 				serverPlayer.connection.send(packet);

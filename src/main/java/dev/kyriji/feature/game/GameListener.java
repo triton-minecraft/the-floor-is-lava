@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -46,7 +47,7 @@ public class GameListener implements Listener {
 		if(!(event.getHitEntity() instanceof Player hitPlayer)) return;
 		hitPlayer.damage(1);
 
-		double knockBackStrength = 1;
+		double knockBackStrength = 0.4;
 		Vector knockBack = event.getEntity().getVelocity().normalize().multiply(knockBackStrength);
 		hitPlayer.setVelocity(event.getEntity().getVelocity().add(knockBack));
 	}
@@ -57,8 +58,11 @@ public class GameListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void onPVP(EntityDamageByEntityEvent event) {
-		if(!(event.getEntity() instanceof Player) || !(event.getDamager() instanceof Player)) return;
+	public void onPVP(EntityDamageEvent event) {
+		DamageSource source = event.getDamageSource();
+		if(source.getCausingEntity() == null || !(source.getCausingEntity() instanceof Player)) return;
+
+		if(!(event.getEntity() instanceof Player)) return;
 
 		Game game = GameManager.INSTANCE.getGame();
 		GameState gameState = game.getGameState();
@@ -79,7 +83,7 @@ public class GameListener implements Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
 		event.setJoinMessage(null);
-		event.getPlayer().setResourcePack("https://www.dropbox.com/scl/fi/2eczbh26vnazelc9u0gzf/TMC-Valentine-s-Day-Texture-Pack.zip?rlkey=hkt8lghbe3s902jxk6rnb7app&st=sh5tq7ca&dl=1");
+		event.getPlayer().setResourcePack("https://www.dropbox.com/scl/fi/l76oyz8m0oa4m40t47trg/Texture.zip?rlkey=01xn6inlohqkymkqkvfhmmlo5&st=q6mfpzom&dl=1");
 
 		WorldManager.init();
 		ScoreboardManager.INSTANCE.addPlayer(event.getPlayer());
@@ -93,6 +97,7 @@ public class GameListener implements Listener {
 			event.getPlayer().teleport(WorldManager.LOBBY_SPAWN);
 			event.getPlayer().setGameMode(GameMode.SURVIVAL);
 			GameManager.INSTANCE.getGame().addPlayer(event.getPlayer());
+			GameManager.INSTANCE.cancelStartTimer();
 		} else {
 			event.getPlayer().teleport(WorldManager.MAP_SPAWN);
 			event.getPlayer().setGameMode(GameMode.SPECTATOR);
@@ -156,6 +161,8 @@ public class GameListener implements Listener {
 		if(gameState == GameState.WAITING) {
 			if(lifeLink != null) LifeLinkManager.removeLifeLink(lifeLink);
 			GameManager.INSTANCE.getGame().removePlayer(event.getPlayer());
+
+			GameManager.INSTANCE.cancelStartTimer();
 		}
 
 		if(gameState == GameState.WAITING || gameState == GameState.ENDED) return;

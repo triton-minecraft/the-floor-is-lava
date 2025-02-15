@@ -25,6 +25,11 @@ public class Game {
 	}
 
 	public void addPlayer(Player player) {
+		if(alivePlayers.contains(player)) {
+			new Exception("Player added twice").printStackTrace();
+			return;
+		}
+
 		alivePlayers.add(player);
 	}
 

@@ -141,13 +141,12 @@ public class AirDrop implements Listener {
 			istantHealth.setItemMeta(potionMeta2);
 
 			addLoot(10, new ItemStack(Material.DIAMOND, 3));
-			addLoot(20, new ItemStack(Material.GOLD_INGOT, 10));
+			addLoot(5, new ItemStack(Material.MACE, 1));
 			addLoot(30, new ItemStack(Material.IRON_INGOT, 15));
 			addLoot(5, new ItemStack(Material.FIREWORK_ROCKET, 1));
 			addLoot(5, new ItemStack(Material.TRIDENT, 1));
 			addLoot(5, fireResistance);
 			addLoot(15, istantHealth);
-			addLoot(10, new ItemStack(Material.GOLDEN_APPLE, 1));
 			addLoot(20, new ItemStack(Material.COOKED_BEEF, 5));
 			addLoot(20, new ItemStack(Material.COOKED_CHICKEN, 5));
 
